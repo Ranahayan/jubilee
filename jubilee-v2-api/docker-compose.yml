@@ -1,0 +1,96 @@
+version: "3.1"
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    volumes:
+      - .:/opt/app/core/
+    ports:
+      - 8017:8010
+    networks:
+      - app_net
+    depends_on:
+      - postgres
+      - redis
+  
+  celery_beat:
+    build:
+      context: .
+      target: beat
+    volumes:
+      - .:/opt/app/core/
+    networks:
+      - app_net
+    depends_on:
+      - postgres
+      - redis
+      - api
+
+  celery_worker:
+    build:
+      context: .
+      target: worker
+    volumes:
+      - .:/opt/app/core/
+    networks:
+      - app_net
+    depends_on:
+      - postgres
+      - redis
+      - api
+  
+  celery_worker_images:
+    build:
+      context: .
+      target: worker_images
+    volumes:
+      - .:/opt/app/core/
+    networks:
+      - app_net
+    depends_on:
+      - postgres
+      - redis
+      - api
+
+  postgres:
+    image: postgres:15.2-alpine
+    restart: always
+    ports:
+      - 5448:5432
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_DB: boilerplate
+      POSTGRES_PASSWORD: password
+    networks:
+      - app_net
+    volumes:
+      - "postgres_volume:/var/lib/postgresql/data"
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6394:6379
+    networks:
+      - app_net
+
+  flower:
+    image: mher/flower
+    command: celery flower --persisten=True
+    restart: always
+    ports:
+      - 5571:5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - BASIC_AUTH=username:password
+    depends_on:
+      - redis
+    networks:
+      - app_net
+
+networks:
+  app_net:
+
+volumes:
+  postgres_volume:
