@@ -1,0 +1,113 @@
+{% extends "admin/login.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+
+{% if passkey_supported %}
+<div id="passkey-login" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+    <p style="margin-bottom: 10px; color: #666;">{% trans "Or sign in with:" %}</p>
+    <button type="button" id="passkey-login-btn" class="button default" style="padding: 10px 20px; font-size: 14px; cursor: pointer;">
+        {% trans "Login with Passkey" %}
+    </button>
+</div>
+
+<script>
+(function() {
+    function base64urlToUint8Array(base64url) {
+        const pad = (4 - (base64url.length % 4)) % 4;
+        const base64 = (base64url + '==='.slice(0, pad))
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+        const bin = atob(base64);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        return arr;
+    }
+
+    function uint8ArrayToBase64url(buf) {
+        let bin = '';
+        const arr = new Uint8Array(buf);
+        for (let i = 0; i < arr.length; i++) bin += String.fromCharCode(arr[i]);
+        return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function toObjectWithUint8Arrays(obj) {
+        if (!obj) return obj;
+        const keys = ['challenge', 'user.id', 'excludeCredentials', 'allowCredentials'];
+        const out = JSON.parse(JSON.stringify(obj));
+        if (out.challenge) out.challenge = base64urlToUint8Array(out.challenge);
+        if (out.user && out.user.id) out.user.id = base64urlToUint8Array(out.user.id);
+        if (out.excludeCredentials) {
+            out.excludeCredentials = out.excludeCredentials.map(function(c) {
+                const cc = Object.assign({}, c);
+                if (cc.id) cc.id = base64urlToUint8Array(cc.id);
+                return cc;
+            });
+        }
+        if (out.allowCredentials) {
+            out.allowCredentials = out.allowCredentials.map(function(c) {
+                const cc = Object.assign({}, c);
+                if (cc.id) cc.id = base64urlToUint8Array(cc.id);
+                return cc;
+            });
+        }
+        return out;
+    }
+
+    function credentialToJSON(cred) {
+        return {
+            id: cred.id,
+            rawId: uint8ArrayToBase64url(cred.rawId),
+            response: {
+                clientDataJSON: uint8ArrayToBase64url(cred.response.clientDataJSON),
+                authenticatorData: uint8ArrayToBase64url(cred.response.authenticatorData),
+                signature: uint8ArrayToBase64url(cred.response.signature),
+                userHandle: cred.response.userHandle ? uint8ArrayToBase64url(cred.response.userHandle) : null
+            },
+            type: cred.type
+        };
+    }
+
+    document.getElementById('passkey-login-btn').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        fetch('{% url "secure_admin:passkey_begin_auth" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(opts) {
+            if (opts.error) throw new Error(opts.error);
+            const options = toObjectWithUint8Arrays(opts);
+            return navigator.credentials.get({ publicKey: options });
+        })
+        .then(function(cred) {
+            if (!cred) throw new Error('No credential returned');
+            return fetch('{% url "secure_admin:passkey_complete_auth" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(credentialToJSON(cred))
+            });
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) throw new Error(data.error);
+            if (data.redirect) window.location.href = data.redirect;
+        })
+        .catch(function(err) {
+            alert(err.message || 'Passkey authentication failed');
+        })
+        .finally(function() { btn.disabled = false; });
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

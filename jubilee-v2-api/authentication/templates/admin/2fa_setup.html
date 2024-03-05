@@ -1,0 +1,87 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{% trans "Setup Two-Factor Authentication" %} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'secure_admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {% trans 'Setup Two-Factor Authentication' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{% trans "Setup Two-Factor Authentication" %}</h1>
+
+{% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<div style="max-width: 600px; margin: 20px 0;">
+    <h2>{% trans "Step 1: Scan QR Code" %}</h2>
+    <p>{% trans "Open your authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.) and scan this QR code:" %}</p>
+    
+    <div style="text-align: center; margin: 20px 0; padding: 20px; background-color: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px;">
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="max-width: 300px; height: auto;">
+    </div>
+    
+    <p style="font-size: 12px; color: #666;">
+        <strong>{% trans "Can't scan?" %}</strong><br>
+        {% trans "Enter this code manually in your app:" %}<br>
+        <code style="font-size: 14px; padding: 5px; background-color: #f0f0f0; display: inline-block; margin-top: 5px;">{{ totp_secret }}</code>
+    </p>
+</div>
+
+<div style="max-width: 600px; margin: 40px 0;">
+    <h2>{% trans "Step 2: Verify Setup" %}</h2>
+    <p>{% trans "After scanning, enter the 6-digit code from your authenticator app to verify the setup:" %}</p>
+    
+    <form method="post" action="{% url 'secure_admin:admin_2fa_setup' %}">
+        {% csrf_token %}
+        <div>
+            <label for="otp_code" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                {% trans "Verification Code:" %}
+            </label>
+            <input 
+                type="text" 
+                id="otp_code" 
+                name="otp_code" 
+                maxlength="6" 
+                pattern="[0-9]{6}" 
+                required 
+                autofocus 
+                style="font-size: 18px; letter-spacing: 4px; text-align: center; width: 200px; padding: 10px; border: 2px solid #007cba; border-radius: 4px;"
+                placeholder="000000"
+            >
+            <p class="help" style="margin-top: 5px; color: #666;">
+                {% trans "Enter the 6-digit code from your authenticator app" %}
+            </p>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <input type="submit" value="{% trans 'Verify and Complete Setup' %}" class="default" style="padding: 10px 20px; font-size: 14px; background-color: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        </div>
+    </form>
+</div>
+
+<div style="margin-top: 40px; padding: 15px; background-color: #e7f3ff; border: 1px solid #007cba; border-radius: 4px;">
+    <strong>{% trans "Recommended Apps:" %}</strong>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+        <li>Google Authenticator</li>
+        <li>Microsoft Authenticator</li>
+        <li>Authy</li>
+        <li>1Password</li>
+        <li>LastPass Authenticator</li>
+    </ul>
+</div>
+
+<div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+    <strong>{% trans "Security Notice:" %}</strong>
+    <p style="margin: 5px 0;">{% trans "Keep your authenticator app secure. If you lose access to your device, you can use backup codes to recover your account." %}</p>
+</div>
+
+{% endblock %}
