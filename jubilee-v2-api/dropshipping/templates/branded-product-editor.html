@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Branded Product Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+      html {
+        font-family: "Inter", sans-serif;
+        font-optical-sizing: auto;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        display: flex;
+      }
+
+      .page {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+      }
+
+      .products {
+        width: 400px;
+        border-right: 1px solid #B7B7B7;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .search {
+        width: 100%;
+        height: 60px;
+        padding: 10px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #EDEDED;
+      }
+
+      .search input {
+        width: 100%;
+        height: 100%;
+        padding: 0 20px;
+        box-sizing: border-box;
+        font-size: 14px;
+        border-radius: 8px;
+        border: none;
+        background-color: #EDEDED;
+      }
+
+      .products-scroll {
+        flex: 1;
+        position: relative;
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
+
+      .products-list {
+        position: absolute;
+      }
+
+      .product {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        padding: 8px 16px;
+        border-bottom: 1px solid #EDEDED;
+        transition: all 0.3s;
+        cursor: pointer;
+      }
+
+      .product:hover {
+        background-color: #F7F7F7;
+      }
+
+      .product img {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        border: 1px solid #ebebeb;
+      }
+
+      .product__info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .product__info h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .product__info p {
+        margin: 0;
+        font-size: 14px;
+        color: #8A8A8A;
+      }
+
+      .editor {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 40px 60px;
+      }
+
+      h1 {
+        font-size: 26px;
+        margin-bottom: 4px;
+      }
+
+      h2 {
+        font-size: 16px;
+        color: #8A8A8A;
+        margin-top: 0;
+        margin-bottom: 26px;
+        font-weight: 400;
+      }
+
+      .editor-content {
+        display: flex;
+        flex-direction: row;
+        gap: 32px;
+      }
+
+      #product-image {
+        background-color: #D9D9D9;
+        border-radius: 8px;
+      }
+
+      .gallery {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .gallery img {
+        border-radius: 4px;
+      }
+
+      .fields {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .fields p {
+        font-size: 14px;
+        margin-top: 0;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .field label {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .field input, .field select {
+        padding: 10px 15px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        background-color: #EDEDED;
+        margin-bottom: 16px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+      }
+
+      .actions {
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #EDEDED;
+      }
+
+      .row {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .button {
+        height: 46px;
+        flex: 1;
+        font-weight: 600;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 10px;
+        border: 1px solid #A8A8A8;
+        background-color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .button.short {
+        max-width: 46px;
+      }
+
+      .button:hover {
+        background-color: #F7F7F7;
+      }
+
+      .images .actions {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        padding: 0;
+        margin-top: -45px;
+        padding: 0 10px;
+        border: none;
+      }
+
+      .images .actions .color-pallete {
+        width:25px;
+        height: 25px;
+        border-radius: 20px;
+        background-color: #000;
+        cursor: pointer;
+        border: 1px solid #000;
+      }
+
+      .images .actions .hide {
+        opacity: 0.8;
+        cursor: pointer;
+      }
+    </style>
+</head>
+<body>
+  <div class="page">
+    <div class="products">
+      <div class="search">
+        <input id="search-input" type="text" placeholder="Search products">
+      </div>
+      <div id="scroll-content" class="products-scroll">
+        <div class="products-list"></div>
+      </div>
+    </div>
+    <div class="editor">
+      <h1 id="product-title">Cotton Bath Towel</h1>
+      <h2 id="product-supplier">By DecorMasters</h2>
+
+      <div class="editor-content">
+        <div class="images">
+          <canvas id="product-image" width="555" height="555"></canvas>
+          <div class="actions">
+            <div id="text-color" class="color-pallete"></div>
+            <div id="hide" class="hide">
+              <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM144 256a144 144 0 1 1 288 0 144 144 0 1 1 -288 0zm144-64c0 35.3-28.7 64-64 64c-7.1 0-13.9-1.2-20.3-3.3c-5.5-1.8-11.9 1.6-11.7 7.4c.3 6.9 1.3 13.8 3.2 20.7c13.7 51.2 66.4 81.6 117.6 67.9s81.6-66.4 67.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3z"/></svg>
+            </div>
+          </div>
+          <!-- <div class="gallery">
+            <img src="https://via.placeholder.com/120" alt="Product Image">
+            <img src="https://via.placeholder.com/120" alt="Product Image">
+            <img src="https://via.placeholder.com/120" alt="Product Image">
+          </div> -->
+        </div>
+        <div class="fields">
+          <p>Adjust the values here to preview the branded image with various texts and fonts.</p>
+          <div class="field">
+            <label>Brand name</label>
+            <input id="brand-text-input" type="text" placeholder="My brand" />
+          </div>
+
+          <div class="field">
+            <label>Font family</label>
+            <select id="font">
+              <option value="Roboto">Roboto</option>
+              <option value="Montserrat">Montserrat</option>
+              <option value="Lato">Lato</option>
+              <option value="Oswald">Oswald</option>
+              <option value="Nunito">Nunito</option>
+              <option value="Merriweather">Merriweather</option>
+              <option value="Pacifico">Pacifico</option>
+              <option value="Raleway">Raleway</option>
+              <option value="Open Sans">Open Sans</option>
+              <option value="Sniglet">Sniglet</option>
+              <option value="Cabin">Cabin</option>
+              <option value="Abril Fatface">Abril Fatface</option>
+              <option value="Special Elite">Special Elite</option>
+              <option value="Six Caps">Six Caps</option>
+              <option value="Josefin Slab">Josefin Slab</option>
+              <option value="Homemade Apple">Homemade Apple</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Permanent Marker">Permanent Marker</option>
+              <option value="Roboto Condensed">Roboto Condensed</option>
+              <option value="Safira March">Safira March</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Logo</label>
+            <input id="logo-file" type="file"/>
+          </div>
+
+          <div class="actions">
+            <p>After editing the brand's position and rotation, save the asset.</p>
+            <div class="row">
+              <button id="update-btn" class="button">Update the asset</button>
+              <button id="delete-btn" class="button short">
+                <!-- Trash Icon -->
+                <svg width="18" height="21" viewBox="0 0 18 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g clip-path="url(#clip0_2_75)">
+                  <path d="M5.43214 0.725977L5.14286 1.3125H1.28571C0.574554 1.3125 0 1.89902 0 2.625C0 3.35098 0.574554 3.9375 1.28571 3.9375H16.7143C17.4254 3.9375 18 3.35098 18 2.625C18 1.89902 17.4254 1.3125 16.7143 1.3125H12.8571L12.5679 0.725977C12.3509 0.278906 11.9049 0 11.4188 0H6.58125C6.09509 0 5.64911 0.278906 5.43214 0.725977ZM16.7143 5.25H1.28571L2.1375 19.1543C2.20179 20.192 3.04554 21 4.06205 21H13.9379C14.9545 21 15.7982 20.192 15.8625 19.1543L16.7143 5.25Z" fill="#929292"/>
+                  </g>
+                  <defs>
+                  <clipPath id="clip0_2_75">
+                  <rect width="18" height="21" fill="white"/>
+                  </clipPath>
+                  </defs>
+                </svg>
+                <!-- End of Trash Icon -->               
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script>
+    /* This script is responsible for the product list rendering and the interaction with the user. */
+    const ACCESS_TOKEN = "{{ access_token }}";
+    const REFRESH_TOKEN = "{{ refresh_token }}";
+    let current_page = 1;
+    let total_pages = 1;
+    let products = []
+    let selectedProduct = null;
+
+    function getHeaders () {
+      return {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+        'Content-Type': 'application/json'
+      };
+    }
+
+    function productTemplate(product) {
+      const asset = (product.assets[0] || {})
+      const template = `
+        <div data-id="${product.id}" class="product">
+          <img src="${asset.thumbnail || asset.image}" alt="Product Image">
+          <div class="product__info">
+            <h3>${product.title}</h3>
+            <p>By ${product.supplier}</p>
+          </div>
+        </div>
+      `;
+      return template;
+    }
+
+    function applySelectedProduct(product) {
+      const title = document.getElementById('product-title');
+      const supplier = document.getElementById('product-supplier');
+
+      title.innerText = product.title;
+      supplier.innerText = `By ${product.supplier}`;
+      setIsTextMode(product.branding_type);
+      // Update the product image in the canvas
+      updateTheBackgroundImage(product.assets[0].image);
+      fetchBrandSettings(product.variants[0].id, function (data) {
+        if (data.x) {
+          points = [
+            { x: data.x, y: data.y, radius: 8, h: 3, v: 1 },
+            { x: data.x + data.width, y: data.y, radius: 8, h: 2, v: 0 },
+            { x: data.x + data.width, y: data.y + data.height, radius: 8, h: 1, v: 3 },
+            { x: data.x, y: data.y + data.height, radius: 8, h: 0, v: 2 }
+          ];
+
+          angle = data.rotation;
+          textColor = data.text_color;
+        
+        } else {
+          points = [
+            { x: 150, y: 150, radius: 8, h: 3, v: 1 },
+            { x: 400, y: 150, radius: 8, h: 2, v: 0 },
+            { x: 400, y: 350, radius: 8, h: 1, v: 3 },
+            { x: 150, y: 350, radius: 8, h: 0, v: 2 }
+          ];
+
+          angle = 0;
+          textColor = "#000000";
+        }
+
+        updateTheTextImage();
+        render();
+      });
+    }
+
+    const productListDiv = document.getElementsByClassName('products-list')[0];
+
+    productListDiv.addEventListener('click', function(event) {
+      let target = event.target.closest('.product');
+
+      if (!target) return;
+        const productId = target.getAttribute('data-id');
+        selectedProduct = products.find(product => product.id === parseInt(productId));
+        applySelectedProduct(selectedProduct);
+    });
+
+    function renderProducts(products) {
+      const productsHTML = products.map(function (product) {
+        return productTemplate(product);
+      }).join('');
+      productListDiv.innerHTML = productsHTML;
+    }
+
+    function refreshToken(callback) {
+      fetch('/authencation/refresh-token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: REFRESH_TOKEN })
+      })
+        .then(response => response.json())
+        .then(data => {
+          ACCESS_TOKEN = data.access_token;
+          callback();
+        });
+    }
+    
+    function fetchProducts(page, search_term = null) {
+      let url = `/dropshipping/products/?page=${page}&branding_type=branded`;
+      if (search_term) url += `&search_term=${search_term}`;
+
+      fetch(url, { headers: getHeaders() })
+        .then(response => response.json())
+        .then(data => {
+          products = products.concat(data.data);
+          if (page === 1 && !selectedProduct) {
+            applySelectedProduct(products[0]);
+            selectedProduct = products[0];
+          }
+          renderProducts(products)
+          total_pages = data.total_pages;
+        }).catch(error => {
+          if (error.status === 401) {
+            refreshToken(() => fetchProducts(page, search_term));
+          } else {
+            Toastify({
+              text: "An error occurred while fetching the products.",
+              duration: 3000,
+              gravity: "top",
+              position: "right",
+              stopOnFocus: false,
+              style: {
+                background: "#f07971",
+              },
+            }).showToast();
+          }
+        });
+    }
+
+    function fetchBrandSettings(variant_id, callback) {
+      fetch(`/dropshipping/brand-settings/${variant_id}/`, { headers: getHeaders() })
+        .then(response => response.json())
+        .then(data => {
+          callback(data)
+        })
+        .catch(error => {
+          if (error.status === 401) {
+            refreshToken(() => fetchBrandSettings(variant_id, callback));
+          } else {
+            Toastify({
+              text: "An error occurred while fetching the product settings.",
+              duration: 3000,
+              gravity: "top",
+              position: "right",
+              stopOnFocus: false,
+              style: {
+                background: "#f07971",
+              },
+            }).showToast();
+          }
+        });
+    }
+
+    function updateBrandSettings(variant_id, settings) {
+      fetch(`/dropshipping/brand-settings/${variant_id}/`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(settings)
+      }).then(function (res){
+        return res.json();
+      })
+      .then(function() {
+        Toastify({
+          text: "Settings updated successfully.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          stopOnFocus: false,
+          style: {
+            background: "#73c97d",
+          },
+        }).showToast();
+      })
+    }
+
+    function deleteBrandSettings(variant_id) {
+      fetch(`/dropshipping/brand-settings/${variant_id}/`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      })
+      .then(function () {
+        Toastify({
+          text: "Settings deleted successfully.",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          stopOnFocus: false,
+          style: {
+            background: "#73c97d",
+          },
+        }).showToast();
+      });
+    }
+
+    function getTitleFromURL() {
+      const url = new URL(window.location.href);
+      const title = url.searchParams.get("title");
+      url.searchParams.delete("title");
+      window.history.pushState({}, '', url);
+      return title;
+    }
+
+    let searchTerm = getTitleFromURL();
+    fetchProducts(current_page, searchTerm);
+
+    if (searchTerm) {
+      document.getElementById('search-input').value = searchTerm;
+    }
+
+    document.getElementById('scroll-content').addEventListener('scroll', function() {
+      const div = this;
+      if(div.scrollTop + div.offsetHeight >= div.scrollHeight) {
+        if (current_page < total_pages) {
+          current_page += 1;
+          fetchProducts(current_page);
+        }
+      }
+    });
+
+    function debounce(func, wait) {
+    let timeout;
+
+    return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Attach a listener to the search input.
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', debounce(function () {
+      current_page = 1;
+      products = []
+      const searchTerm = searchInput.value;
+
+      if (searchTerm.length === 0) {  
+        fetchProducts(current_page);
+      } else {
+        fetchProducts(1, searchTerm);
+      }
+    }, 500));
+  </script>
+  <script>
+    /* This script is responsible for the canvas drawing and the interaction with the user. */
+
+    const canvas = document.getElementById('product-image');
+    const ctx = canvas.getContext('2d');
+    
+    /* h and v represent the indices of the point that will follow the constraints. 
+    In case of repetition, the same behavior will be applied when moving horizontally (h) and vertically (v).*/
+    let points = [
+      { x: 150, y: 150, radius: 8, h: 3, v: 1 },
+      { x: 400, y: 150, radius: 8, h: 2, v: 0 },
+      { x: 400, y: 350, radius: 8, h: 1, v: 3 },
+      { x: 150, y: 350, radius: 8, h: 0, v: 2 }
+    ];
+
+    let mouse = { x: 0, y: 0 };
+    let isDragging = false;
+    let isMovingPivot = false;
+    let isRotating = false;
+    let drawRotationPoints = false;
+    let dragingPoint = null;
+    let originalPosition = { x: 0, y: 0 };
+    let angle = 0;
+    let text = "Jubilee";
+    let fontSize = 60;
+    let fontFamily = "Roboto";
+    let textColor = "#000000";
+    let logo = "https://via.placeholder.com/120";
+    let isTextMode = true;
+    let hideGizmos = false;
+
+    const img = new Image();
+    const backgroundImg = new Image();
+
+    img.onload = function() {
+      render();
+    };
+
+    backgroundImg.onload = function() {
+      render();
+    };
+
+    WebFont.load({
+      google: {
+        families: ["Roboto", "Montserrat", "Lato", "Oswald", "Nunito", "Merriweather", "Pacifico", "Raleway", "Open Sans", "Sniglet", "Cabin", "Abril Fatface", "Special Elite", "Six Caps", "Josefin Slab", "Homemade Apple", "Playfair Display", "Permanent Marker", "Roboto Condensed", "Safira March"]
+      },
+      active: function() {
+        updateTheTextImage();
+        render();
+      }
+    });
+
+    const updateBtn = document.getElementById('update-btn');
+    updateBtn.addEventListener('click', function() {
+      const variant_id = selectedProduct.variants[0].id;
+      const settings = {
+        x: points[0].x,
+        y: points[0].y,
+        rotation: angle,
+        width: Math.sqrt(Math.pow(points[0].x - points[1].x, 2) + Math.pow(points[0].y - points[1].y, 2)),
+        height: Math.sqrt(Math.pow(points[0].x - points[3].x, 2) + Math.pow(points[0].y - points[3].y, 2)),
+        text_color: textColor,
+      };
+      updateBrandSettings(variant_id, settings);
+    });
+    
+    const deleteBtn = document.getElementById('delete-btn');
+    deleteBtn.addEventListener('click', function() {
+      deleteBrandSettings(selectedProduct.variants[0].id);
+    });
+
+    const logoInput = document.getElementById('logo-file');
+    logoInput.addEventListener('change', function() {
+      const file = logoInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        logo = e.target.result;
+        loadLogo();
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    function setIsTextMode(branding_type) {
+      if (branding_type === "brand_name") {
+        isTextMode = true;
+        updateTheTextImage();
+      } else {
+        isTextMode = false;
+        loadLogo();
+      }
+      
+      render();
+    }
+
+    function loadLogo() {
+      if (isTextMode) return;
+      img.src = logo;
+    }
+
+    const fontSelect = document.getElementById('font');
+    fontSelect.addEventListener('change', function() {
+      fontFamily = fontSelect.value;
+      updateTheTextImage();
+      render();
+    });
+
+    const brandTextInput = document.getElementById('brand-text-input');
+    brandTextInput.addEventListener('input', debounce(function () {
+      text = brandTextInput.value;
+      updateTheTextImage();
+      render();
+    }, 500));
+
+    const colorPallete = document.getElementById('text-color');
+    colorPallete.addEventListener('click', function() {
+      if (textColor == "#000000") {
+        textColor = "#ffffff";
+      } else {
+        textColor = "#000000";
+      }
+
+      colorPallete.style.backgroundColor = textColor;
+      updateTheTextImage();
+      render();
+    });
+
+    const hideButton = document.getElementById('hide');
+    hideButton.addEventListener('click', function() {
+      hideGizmos = !hideGizmos;
+      if (hideGizmos) {
+        hideButton.style.opacity = 0.5;
+      } else {
+        hideButton.style.opacity = 0.8;
+      }
+      render();
+    });
+
+    function getThePivot() {
+      let sumX = 0, sumY = 0;
+
+      for (let i = 0; i < points.length; i++) {
+          sumX += points[i].x;
+          sumY += points[i].y;
+      }
+
+      const centerX = sumX / points.length;
+      const centerY = sumY / points.length;
+      return [centerX, centerY];
+    }
+
+    function updateTheBackgroundImage(url) {
+      backgroundImg.src = url;
+    }
+
+    function rotatePoint(point, pivot, angleDegrees) {
+      const angleRadians = angleDegrees * Math.PI / 180;
+      const rotatedX = pivot[0] + (point.x - pivot[0]) * Math.cos(angleRadians) - (point.y - pivot[1]) * Math.sin(angleRadians);
+      const rotatedY = pivot[1] + (point.x - pivot[0]) * Math.sin(angleRadians) + (point.y - pivot[1]) * Math.cos(angleRadians);
+      return { x: rotatedX, y: rotatedY, radius: point.radius };
+    }
+
+    function getTheRotatedPoints() {
+      const pivot = getThePivot();
+      const rotated_points = [];
+
+      for (point of points) {
+        rotated_points.push(rotatePoint(point, pivot, angle));
+      }
+
+      return rotated_points;
+    }
+
+    function inverseRotatePoint(mouseX, mouseY, pivot, angleDegrees) {
+      const angleRadians = -angleDegrees * Math.PI / 180;
+      const cosTheta = Math.cos(angleRadians);
+      const sinTheta = Math.sin(angleRadians);
+
+      const nx = cosTheta * (mouseX - pivot[0]) - sinTheta * (mouseY - pivot[1]) + pivot[0];
+      const ny = sinTheta * (mouseX - pivot[0]) + cosTheta * (mouseY - pivot[1]) + pivot[1];
+
+      return { x: nx, y: ny };
+    }
+
+    function getMidPoints() {
+      const rotatedMidpoints = [];
+      const pivot = getThePivot();
+
+      for (let i = 0; i < points.length; i++) {
+        let nextIndex = (i + 1) % points.length;
+        let npx = (points[i].x + points[nextIndex].x) / 2;
+        let npy = (points[i].y + points[nextIndex].y) / 2;
+        let np_r = rotatePoint({ x: npx, y: npy, radius: 6 }, pivot, angle);
+        rotatedMidpoints.push(np_r);
+      }
+
+      return rotatedMidpoints;
+    }
+
+    function getRotationAngle(pivot, mouse) {
+      let radians = Math.atan2(mouse.y - pivot[1], mouse.x - pivot[0]);
+      let degrees = radians * (180 / Math.PI);
+      return degrees;
+    }
+
+    function drawCircle(point, color) {
+        ctx.fillStyle = color || 'black';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2, true);
+        ctx.fill();
+    }
+
+    function drawLine(point1, point2) {
+      ctx.setLineDash([10, 5]);
+      ctx.strokeStyle = 'black';
+      ctx.beginPath();
+      ctx.moveTo(point1.x, point1.y);
+      ctx.lineTo(point2.x, point2.y);
+      ctx.stroke();
+    }
+
+    function updateTheTextImage() {
+      if (!isTextMode) return;
+
+      const textCanvas = document.createElement('canvas');
+      textCanvas.width = 1200;
+      textCanvas.height = 200;
+      let textCtx = textCanvas.getContext('2d');
+
+      textCtx.fillStyle = textColor;
+      textCtx.font = `${fontSize}px ${fontFamily}`;
+      textCtx.fillText(text, 5, 100);
+
+      const imageData = textCtx.getImageData(0, 0, textCanvas.width, textCanvas.height);
+      const data = imageData.data;
+      let minX = textCanvas.width, minY = textCanvas.height, maxX = 0, maxY = 0;
+
+      for(let y = 0; y < textCanvas.height; y++) {
+          for(let x = 0; x < textCanvas.width; x++) {
+              const alpha = data[(y * textCanvas.width + x) * 4 + 3];
+              if(alpha > 0) {
+                  minX = Math.min(minX, x);
+                  maxX = Math.max(maxX, x);
+                  minY = Math.min(minY, y);
+                  maxY = Math.max(maxY, y);
+              }
+          }
+      }
+
+      const width = maxX - minX + 10;
+      const height = maxY - minY + 10;
+      const capturedImageData = textCtx.getImageData(minX, minY, width, height);
+      
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = width;
+      finalCanvas.height = height;
+      let finalCtx = finalCanvas.getContext('2d');
+
+      finalCtx.putImageData(capturedImageData, 5, 5); 
+      img.src = finalCanvas.toDataURL();
+    }
+
+    function drawImage() {
+      ctx.save();
+      const width = Math.sqrt(Math.pow(points[0].x - points[1].x, 2) + Math.pow(points[0].y - points[1].y, 2));
+      const height = Math.sqrt(Math.pow(points[0].x - points[3].x, 2) + Math.pow(points[0].y - points[3].y, 2));
+      
+      const destAspectRatio = width / height;
+      const imgAspectRatio = img.width / img.height;
+
+      let drawWidth, drawHeight;
+      if (destAspectRatio > imgAspectRatio) {
+          drawHeight = height;
+          drawWidth = img.width * (drawHeight / img.height);
+      } else {
+          drawWidth = width;
+          drawHeight = img.height * (drawWidth / img.width);
+      }
+
+      const origin = rotatePoint(points[0], getThePivot(), angle);
+      const radians = angle * (Math.PI / 180);
+      ctx.translate(origin.x, origin.y);
+      ctx.rotate(radians);
+      ctx.drawImage(img, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+      ctx.restore();
+    }
+
+    function drawBackgroundImage() {
+      const width =  canvas.width;
+      const height = canvas.height;
+      const destAspectRatio = width / height;
+      const imgAspectRatio = backgroundImg.width / backgroundImg.height;
+
+      let drawWidth, drawHeight;
+      if (destAspectRatio > imgAspectRatio) {
+          drawHeight = height;
+          drawWidth = backgroundImg.width * (drawHeight / backgroundImg.height);
+      } else {
+          drawWidth = width;
+          drawHeight = backgroundImg.height * (drawWidth / backgroundImg.width);
+      }
+
+      ctx.drawImage(backgroundImg, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#000';
+      drawBackgroundImage(); // Draw the background image first
+      drawImage(); // Draw the text image or logo image
+
+      if (hideGizmos) return;
+
+      const pivot = getThePivot();
+      const rotated_points = getTheRotatedPoints();
+
+      rotated_points.forEach((point, i) => {
+        drawLine(point, rotated_points[(i + 1) % points.length]);
+      });
+
+      for (point of rotated_points) {
+        drawCircle({ x: point.x, y: point.y, radius: point.radius +2}, 'white');
+        drawCircle(point);
+      }
+
+      drawCircle({ x: pivot[0], y: pivot[1], radius: 6 }, "#00000042");
+
+      if (drawRotationPoints) {
+        const rotatedMidpoints = getMidPoints();
+
+        for (point of rotatedMidpoints) {
+          drawCircle(point, "red");
+        }
+      }
+    }
+
+    function isMouseOverCircle(dx, dy, radius) {
+      return dx * dx + dy * dy <= radius * radius;
+    }
+
+    canvas.addEventListener('mousedown', function(e) {
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+      const rotated_points = getTheRotatedPoints();
+
+      rotated_points.forEach((point, i) => {
+        var dx = mouse.x - point.x;
+        var dy = mouse.y - point.y;
+
+        if (isMouseOverCircle(dx, dy, point.radius)) {
+          canvas.style.cursor = 'grab';
+          isDragging = true;
+          dragingPoint = points[i];
+          originalPosition.x = point.x;
+          originalPosition.y = point.y;
+        }
+      })
+      
+      const pivot = getThePivot();
+      var dx = mouse.x - pivot[0];
+      var dy = mouse.y - pivot[1];
+
+      if (isMouseOverCircle(dx, dy, 6)) {
+        isMovingPivot = true;
+      }
+
+      const rotatedMidpoints = getMidPoints();
+
+      for (point in rotatedMidpoints) {
+        var dx = mouse.x - rotatedMidpoints[point].x;
+        var dy = mouse.y - rotatedMidpoints[point].y;
+
+        if (isMouseOverCircle(dx, dy, 6)) {
+          isRotating = true;
+          break;
+        }
+      }
+    });
+
+    canvas.addEventListener('mousemove', function(e) {
+      mouse.x = e.pageX - this.offsetLeft;
+      mouse.y = e.pageY - this.offsetTop;
+      mouse = inverseRotatePoint(mouse.x, mouse.y, getThePivot(), angle);
+
+      const rotated_points = getTheRotatedPoints();
+      const pivot = getThePivot();
+      var isOverCircle = false;
+
+      for (point of rotated_points) {
+        var dx = e.pageX - this.offsetLeft - point.x;
+        var dy = e.pageY - this.offsetTop - point.y;
+
+        if (isMouseOverCircle(dx, dy, point.radius)) {
+          isOverCircle = true;
+        }
+      }
+
+      if (isOverCircle) {
+        canvas.style.cursor = 'pointer';
+      } else {
+        canvas.style.cursor = 'default';
+      }
+
+      var dx = mouse.x - pivot[0];
+      var dy = mouse.y - pivot[1];
+
+      if (isMouseOverCircle(dx, dy, 6)) {
+        canvas.style.cursor = 'move';
+      }
+
+      const rotatedMidpoints = getMidPoints();
+      const lastStateDrawRotationPoints = drawRotationPoints;
+
+      for (point in rotatedMidpoints) {
+        var dx = e.pageX - this.offsetLeft - rotatedMidpoints[point].x;
+        var dy = e.pageY - this.offsetTop - rotatedMidpoints[point].y;
+
+        if (isMouseOverCircle(dx, dy, 6)) {
+          canvas.style.cursor = 'pointer';
+          drawRotationPoints = true;
+          break;
+        } else {
+          drawRotationPoints = false;
+        }
+      }
+      
+      if (isDragging) {
+        canvas.style.cursor = 'grab';
+        dragingPoint.x = mouse.x;
+        dragingPoint.y = mouse.y;
+
+        const horizontallBrother = points[dragingPoint.h];
+        const verticalBrother = points[dragingPoint.v];
+        horizontallBrother.x = dragingPoint.x;
+        verticalBrother.y = dragingPoint.y;
+      }
+
+      if (isMovingPivot) {
+        const deltaX = e.pageX - this.offsetLeft - pivot[0];
+        const deltaY = e.pageY - this.offsetTop - pivot[1];
+
+        for (point of points) {
+          point.x += deltaX;
+          point.y += deltaY;
+        }
+      }
+
+      if (isRotating) {
+        const mouse_x = e.pageX - this.offsetLeft;
+        const mouse_y = e.pageY - this.offsetTop;
+        angle = getRotationAngle(pivot, { x: mouse_x, y: mouse_y});
+      }
+
+      if (isDragging || isMovingPivot || isRotating || (drawRotationPoints || lastStateDrawRotationPoints)) {
+        render();
+      }
+    });
+
+    canvas.addEventListener('mouseup', function(e) {
+      if (isDragging) {
+        isDragging = false;
+        dragingPoint = null;
+      }
+
+      isMovingPivot = false;
+      isRotating = false;
+      render();
+    });
+
+    updateTheTextImage();
+    loadLogo();
+    render();
+  </script>
+</body>
+</html>

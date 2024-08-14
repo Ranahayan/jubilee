@@ -1,0 +1,290 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice-1001</title>
+  <style type="text/css">
+      html {
+        background-color: #f2f2f2;
+      }
+
+      @media print {
+          #print-controls {
+              display: none;
+          }
+      }
+
+      @page { margin: 0; }
+      #print-controls {
+          text-align: center;
+          width: 300px;
+          background-color: #413951;
+          height: 30px;
+          margin: auto;
+          margin-bottom: 20px;
+          margin-top: -10px;
+          border-bottom-left-radius: 7px;
+          border-bottom-right-radius: 7px;
+          color: white;
+          padding-top: 10px;
+          cursor: pointer;
+      }
+      #print-controls:hover {
+          background-color: #4c425f;
+      }
+  </style>
+  <style>
+      @media not print {
+          .invoice-box {
+              box-shadow: 0 0 10px rgba(0, 0, 0, .05);
+              border-radius: 10px;
+          }
+      }
+      .invoice-box {
+          height:auto;
+          width:21cm;
+          margin: auto;
+          background: white;
+          padding: 30px;
+          font-size: 16px;
+          line-height: 24px;
+          font-family: sans-serif;
+          color: #555;
+          position: relative;
+      }
+      .invoice-box table {
+          width: 100%;
+          line-height: inherit;
+          text-align: left;
+      }
+      .invoice-box table td {
+          padding: 5px;
+          vertical-align: top;
+      }
+      .invoice-box table tr td:nth-child(2) {
+          text-align: right;
+      }
+      .invoice-box table tr.top table td {
+          padding-bottom: 20px;
+      }
+      .invoice-box table tr.top table td.title {
+          font-size: 45px;
+          line-height: 45px;
+          color: #333;
+      }
+      .invoice-box table tr.information table td {
+          padding-bottom: 40px;
+          font-size: 14px;
+          color: #413951
+      }
+      .invoice-box table tr.heading td {
+          border-bottom: 1px solid #d9d9d9;
+          padding-top: 50px;
+          font-size: 12px;
+          text-align: left;
+      }
+      .invoice-box table tr.note-client {
+          height: 100px;
+      }
+      .invoice-box table tr.note-client td {
+          border-radius: 5px;
+          border: solid 1px #d9d9d9;
+          width: 723px;
+          font-size: 14px;
+          padding: 8px 0 0 13px;
+      }
+      .invoice-box table tr.item td {
+          border-bottom: 1px solid #eee;
+          font-size: 16px;
+          font-weight: 600;
+          color: #413951;
+          text-align: left;
+      }
+      .invoice-box table tr.item .sub-total {
+          color: #625ac9
+      }
+      .invoice-box table tr.item.last td {
+          border-bottom: none;
+      }
+      .invoice-box table tr.total td.line-total {
+          border-top: 1px solid #eee;
+          text-align: left;
+      }
+      .invoice-box table .sub-title {
+          font-family: sans-serif;
+          font-size: 11px;
+          font-weight: 300;
+          font-style: normal;
+          font-stretch: normal;
+          line-height: normal;
+          letter-spacing: 0.8px;
+          color: #413951;
+          text-align: left !important;
+          width: 160px !important
+      }
+      .invoice-box table strong {
+          color: #413951
+      }
+      .invoice-box footer {
+          text-align: center;
+          margin-top: 50px;
+      }
+      footer {
+          bottom: 0;
+          width: 100%;
+          margin-left: -25px;
+      }
+      @media only screen and (max-width: 600px) {
+          .invoice-box table tr.top table td {
+              width: 100% !important;
+              display: block;
+              text-align: center !important;
+          }
+          .invoice-box table tr.information table td {
+              width: 100%;
+              display: block;
+              text-align: center;
+          }
+      }
+      /** RTL **/
+      .rtl {
+          direction: rtl;
+          font-family: sans-serif;
+      }
+      .rtl table {
+          text-align: right;
+      }
+      .rtl table tr td:nth-child(2) {
+          text-align: left;
+      }
+  </style>
+</head>
+<body>
+<div id="print-controls" onclick={window.print()}>
+  <div>
+    Click here to print the invoice
+  </div>
+</div>
+  <div class="invoice-box">
+    <table cellpadding="0" cellspacing="0">
+      <tr class="top">
+        <td colspan="5">
+          <table>
+            <tr>
+              <td class="title">
+                {% if logo %}
+                  <img style="width:100%; max-width:130px;" src="{{ logo }}" />
+                {% endif %}
+              </td>
+              <span class='pull-right'>
+                <td class="sub-title">
+                  Date Issued:
+                  <strong>{{ date_issued }}</strong><br>
+                  Invoice No:
+                  <strong>{{ invoice_no }}</strong><br>
+                  Reference:
+                  <strong>{{ invoice_no }}</strong>
+                </td>
+              </span>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr class="information">
+        <td colspan="5">
+          <table>
+            <tr>
+              <td>
+                <b>Ship to</b>
+                <br> {{ customer_name }}
+                <br> {{ ship_to_address.line_1.value }}
+                {% if ship_to_address.line_2.value %}
+                <br> {{ ship_to_address.line_2.value }}
+                {% endif %}
+                <br> {{ ship_to_address.city.value }}, {{ ship_to_address.state.value }} 
+                <br> {{ ship_to_address.zip.value }} {{ ship_to_address.country.value }}
+                {% if ship_to_address.phone.value %}
+                <br> {{ ship_to_address.phone.value }}
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% if notes %}
+      <tr class="note-client">
+        <td colspan="5">
+          {{ notes }}
+        </td>
+      </tr>
+      {% endif %}
+      <tr style="height: 20px">
+      </tr>
+      <tr class="heading">
+        <td> Quantity </td>
+        <td> Item Description </td>
+        <td> Unit Price</td>
+        <td> Total </td>
+      </tr>
+      {% for item in line_items %}
+      <tr class="item">
+        <td> {{ item.quantity }} </td>
+        <td> {{ item.title }} </td>
+        <td> {{ item.cost }}</td>
+        <td> {{ item.total }} </td>
+      </tr>
+      {% endfor %}
+      <tr class="total">
+        <td></td>
+        <td class="line-total"></td>
+        <td class="line-total"> Subtotal: </td>
+        <td class="line-total">
+          <span style="color: #625ac9">{{ sub_total }}</span>
+        </td>
+      </tr>
+      {% if shipping_cost %}
+      <tr class="total">
+        <td></td>
+        <td class="line-total"></td>
+        <td class="line-total"> Shipping Costs: </td>
+        <td class="line-total">
+          <span style="color: #625ac9">{{ shipping_cost }}</span>
+        </td>
+      </tr>
+      {% endif %}
+      {% if transaction_fee %}
+      <tr class="total">
+        <td></td>
+        <td class="line-total"></td>
+        <td class="line-total"> Transaction Costs: </td>
+        <td class="line-total">
+          <span style="color: #625ac9">{{ transaction_fee }}</span>
+        </td>
+      </tr>
+      {% endif %}
+      <tr class="total">
+        <td></td>
+        <td class="line-total"></td>
+        <td class="line-total"> Total: </td>
+        <td class="line-total">
+          <strong style="color: #625ac9">{{ total }}</strong>
+        </td>
+      </tr>
+    </table>
+    <footer>
+      Bill to:
+      {{ customer_name }} - {{ ship_to_address.line_1.value }} {{ ship_to_address.line_2.value }}
+      <br>
+      {{ ship_to_address.city.value }}, 
+      {{ ship_to_address.state.value }}
+      {{ ship_to_address.zip.value }}
+      {{ ship_to_address.country.value }}
+      <br>
+      {{ ship_to_address.phone.value }}
+      <p> {{ store_name }} - {{ website }}</p>
+      <p>{{ contact_email }}</p>
+    </footer>
+  </div>
+</body>
+</html>
